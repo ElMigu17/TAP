@@ -52,7 +52,7 @@ Correções #<NÚMERO DO PROBLEMA QUE FOI RESOLVIDO>
 
 ## Licença
 
-Distribuído sob a licença MIT. Veja `LICENSE.txt` para mais informações.
+Distribuído sob a licença GPLv3. Veja `LICENSE` para mais informações.
 
 ## Contato
 
