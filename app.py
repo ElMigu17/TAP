@@ -14,10 +14,11 @@ DOSCENTES_HEAD_CSV = 'SIAPE,Nome,Redução'
 DISCIPLINAS_HEAD_CSV = 'Disciplina,Local,Tipo,Tempo,Período,Dia,Horário,Turma,Vagas Normais,Vagas Reservadas para Calouros,Vagas para Matrícula Especial,Total Vagas Normais,Total Vagas Reservadas para Calouros,Total Vagas para Matrícula Especial,Docente,'
 QTD_FIM_ULTIMO_SEMESTRE = 'SIAPE,Professores,Créditos,Número de Disciplinas,nº estudantes fim de período'
 
-ARQ_DISCIPLINA = 'data/disciplinas.json'
-ARQ_DOCENTE = 'data/docentes.json'
-ARQ_SOLUCAO = 'data/solucao.json'
-ARQ_DADO_SOLUCAO = 'data/dados_solucao.json'
+DIR_DATA = 'data/'
+ARQ_DISCIPLINA = DIR_DATA + 'disciplinas.json'
+ARQ_DOCENTE = DIR_DATA + 'docentes.json'
+ARQ_SOLUCAO = DIR_DATA + 'solucao.json'
+ARQ_DADO_SOLUCAO = DIR_DATA + 'dados_solucao.json'
 
 NOME_ARQUIVO_HEAD_CSV = {
     'docentes_csv': DOSCENTES_HEAD_CSV,
@@ -75,12 +76,12 @@ def enviar_file(request, file_name, tipo_arquivo):
             json_object = json.loads(data)
 
             if item_arquivo_json[file_name] in json_object[0]:
-                with open('data/' + file_name + '.json', 'w') as file:
+                with open(DIR_DATA + file_name + '.json', 'w') as file:
                     json.dump(json_object, file)
                 return 'null'
         else:
             if data.split('\n')[0] == NOME_ARQUIVO_HEAD_CSV[file_name]:
-                with open('data/' + file_name + '.csv', 'w') as file:
+                with open(DIR_DATA + file_name + '.csv', 'w') as file:
                     file.write(data)
                 return 'null'
         return file_name
@@ -93,13 +94,13 @@ def solver(tipo_arquivo):
     if tipo_arquivo == 'csv':
         leitor = leitor_csv()
         try:
-            leitor.main('data/docentes_csv.csv', 
-                    'data/disciplinas_prox.csv', 
-                    'data/qtd_fim_ultimo_semestre.csv',
-                    'data/preferencias.csv',
-                    'data/ultimo_semestre.csv',
-                    'data/penultimo_semestre.csv', 
-                    'data/antipenultimo_semestre.csv'
+            leitor.main(DIR_DATA + 'docentes_csv.csv', 
+                    DIR_DATA + 'disciplinas_prox.csv', 
+                    DIR_DATA + 'qtd_fim_ultimo_semestre.csv',
+                    DIR_DATA + 'preferencias.csv',
+                    DIR_DATA + 'ultimo_semestre.csv',
+                    DIR_DATA + 'penultimo_semestre.csv', 
+                    DIR_DATA + 'antipenultimo_semestre.csv'
                     )
         except ValueError as e:
             erro_str = ''
@@ -161,7 +162,7 @@ def docentes_info():
 @app.route('/erros-de-leitura')
 def erros_de_leitura():
     try:
-        with open('data/erros.json', 'r') as file:
+        with open(DIR_DATA + 'erros.json', 'r') as file:
             incoerencias = json.load(file)
     except:
         return 'Arquivo de erros não está presentes'
@@ -181,7 +182,7 @@ def files_existence(tipo_arquivo):
                       'antipenultimo_semestre': False}
         
     for ex in existencia:
-        existencia[ex] = os.path.exists('data/' + ex + '.' + tipo_arquivo)
+        existencia[ex] = os.path.exists(DIR_DATA + ex + '.' + tipo_arquivo)
 
     existencia['solucao'] = os.path.exists(ARQ_SOLUCAO)
 
@@ -195,7 +196,7 @@ def download_file(tipo_arquivo):
     if tipo_arquivo == 'csv':
         converte_solucao_csv()
 
-    PATH='data/solucao.' + tipo_arquivo
+    PATH=DIR_DATA + 'solucao.' + tipo_arquivo
     return send_file(PATH,as_attachment=True, download_name=('distribuicao_prox_semestre.' + tipo_arquivo))
 
 def converter_scss():
@@ -204,7 +205,7 @@ def converter_scss():
 def converte_solucao_csv():
     with open(ARQ_SOLUCAO, 'r') as file:
         solucao_json = json.load(file)
-    with open('data/disciplinas_prox.csv', 'r') as file:
+    with open(DIR_DATA + 'disciplinas_prox.csv', 'r') as file:
         dados_gerais = file.read()
     dados_output = ''
     novos_dados = dados_gerais.split('\n')
@@ -243,7 +244,7 @@ def converte_solucao_csv():
         dados_output = dados_output[:-1]
         dados_output += '\n'
 
-    with open('data/solucao.csv', 'w') as file:
+    with open(DIR_DATA + 'solucao.csv', 'w') as file:
         file.write(dados_output)
 
 
@@ -275,6 +276,9 @@ def validar_solucao():
 
 
 if __name__ == '__main__':
+    newpath = 'data'
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
     app.run(debug=True)
 
 
