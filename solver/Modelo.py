@@ -53,27 +53,43 @@ class distribuicao_graduacao:
         self.atribuicao = {}
         for doc in self.docentes:
             doc.disciplinas = []
-            for dis in self.disciplinas:
-                self.atribuicao[(doc.pos, dis.pos)] = self.modelo.NewBoolVar('atribuicao_doc%idis%i' % (doc.pos, dis.pos)) 
+            for comp in self.composicao_de_turma:
+                self.atribuicao[(doc.pos, comp.pos)] = self.modelo.NewBoolVar('atribuicao_doc%idis%i' % (doc.pos, comp.pos)) 
     
     def fixacao_pos_opt(self):
-        print("aaa", self.fixados)
         for fixado in self.fixados:
             self.modelo.AddExactlyOne(self.atribuicao[fixado])
-            print(self.atribuicao[fixado])
+    
+    def cira_variaveis_de_agrupamento_de_composicoes(self):
+        self.composicoes_por_disc = {}
+
+        for comp in self.composicao_de_turma:
+            cod_disc = hash(comp.string_cod_turma().split("_")[0])
+            if cod_disc not in self.composicoes_por_disc:
+                self.composicoes_por_disc[cod_disc] = []
+            self.composicoes_por_disc[cod_disc].append(comp)
+
+        self.atrib_grupos = {}
+        for doc in self.docentes:
+            for key in self.composicoes_por_disc:
+
+                self.atrib_grupos[(doc.pos, key)] = self.modelo.NewBoolVar('atribuicao_doc%idiskey%i' % (doc.pos, key)) 
+                for comp in self.composicoes_por_disc[key]:
+                    self.modelo.Add(self.atrib_grupos[(doc.pos, key)] == 1).OnlyEnforceIf(self.atribuicao[(doc.pos, comp.pos)])
+
 ## Restrições
 
     def res_um_doc_por_dis(self):
-        for dis in self.disciplinas:
+        for comp in self.composicao_de_turma:
             self.modelo.AddExactlyOne(
-                self.atribuicao[(doc.pos, dis.pos)] for doc in self.docentes)
+                self.atribuicao[(doc.pos, comp.pos)] for doc in self.docentes)
             
     def res_limites_creditos(self):
 
         for doc in self.docentes:
             total = 0
-            for dis in self.disciplinas:
-                total += self.atribuicao[(doc.pos, dis.pos)]*dis.qtd_creditos
+            for comp in self.composicao_de_turma:
+                total += self.atribuicao[(doc.pos, comp.pos)]*comp.qtd_creditos
 
             self.modelo.Add(total >= self.limite_inferior)
             if doc.reducao == 1:
@@ -132,12 +148,12 @@ class distribuicao_graduacao:
 
     def todos_conflitos_horario(self) -> list:
         ids_pares_proibidos = []
-        for i in range(len(self.disciplinas)):
-            for j in range(i, len(self.disciplinas)):
-                dis = self.disciplinas
+        comp = self.composicao_de_turma
+        for i in range(len(self.composicao_de_turma)):
+            for j in range(i, len(self.composicao_de_turma)):
 
-                if self.ha_conflito_horario(dis[i], dis[j]):
-                    ids_pares_proibidos.append([dis[i].pos, dis[j].pos])
+                if self.ha_conflito_horario(comp[i], comp[j]):
+                    ids_pares_proibidos.append([comp[i].pos, comp[j].pos])
         return ids_pares_proibidos
 
     def res_horario(self):
@@ -148,13 +164,23 @@ class distribuicao_graduacao:
                 self.modelo.Add((self.atribuicao[(doc.pos, par[0])] + self.atribuicao[(doc.pos, par[1])]) <= 1)
 
     def res_prioridade(self):
+        cod_turma_to_disciplina = {}
+        for comp in self.composicao_de_turma:
+            cod_turma_to_disciplina[comp.string_cod_turma()] = comp
+
         for doc in self.docentes:
             for pre in doc.preferencia:
                 if self.possui_prioridade(pre, doc):
-                    for dis in self.disciplinas:
-                        if dis.string_cod_turma() == pre:
-                            self.modelo.AddExactlyOne(self.atribuicao[(doc.pos, dis.pos)])
+                    comp = cod_turma_to_disciplina[pre]
+                    self.modelo.AddExactlyOne(self.atribuicao[(doc.pos, comp.pos)])
     
+    def res_tres_disciplina(self):
+        for doc in self.docentes:
+            docents_groups = 0
+            for key in self.composicoes_por_disc:
+                docents_groups += self.atrib_grupos[(doc.pos, key)]
+            self.modelo.Add(docents_groups <= 3)
+
     def possui_prioridade(self, pre, doc: docente):
         return pre in doc.disc_per_1 and not ( pre in doc.disc_per_2 and pre in doc.disc_per_3 )
 
@@ -170,25 +196,25 @@ class distribuicao_graduacao:
         
     def hankeia_por_disciplina(self):
         ranking = {}
-        for dis in self.disciplinas:
-            cod_turma_dis = dis.string_cod_turma()
-            ranking[dis.pos] = []
+        for comp in self.composicao_de_turma:
+            cod_turma_dis = comp.string_cod_turma()
+            ranking[comp.pos] = []
 
             for doc in self.docentes:
                 if cod_turma_dis in doc.preferencia:
-                    self.insere_ordenado(ranking[dis.pos], doc, cod_turma_dis)
+                    self.insere_ordenado(ranking[comp.pos], doc, cod_turma_dis)
             
-            if len(ranking[dis.pos]) <= 1:
-                ranking.pop(dis.pos, None)
+            if len(ranking[comp.pos]) <= 1:
+                ranking.pop(comp.pos, None)
         
         return ranking    
 
     def opt_interesse(self):
         pref_disc = 0
         for doc in self.docentes:
-            for dis in self.disciplinas:
-                if dis.codigo in doc.preferencia:
-                    pref_disc += (self.atribuicao[(doc.pos, dis.pos)] * doc.preferencia[dis.codigo])
+            for comp in self.composicao_de_turma:
+                if comp.codigo in doc.preferencia:
+                    pref_disc += (self.atribuicao[(doc.pos, comp.pos)] * doc.preferencia[comp.codigo])
         return pref_disc
 
     def opt_horarios(self):
@@ -221,7 +247,6 @@ class distribuicao_graduacao:
                 opt_formula += (self.atribuicao[(h_doc_list[i].pos, h)] * (tam-i))
         return opt_formula
 
-
 # Exibições
 
     def exibe_solucao_achada(self, solver):
@@ -244,15 +269,15 @@ class distribuicao_graduacao:
         for doc in self.docentes:
             qtds_analisadas["creditos_por_doc"].append(0)
 
-            for dis in self.disciplinas:
-                self.analise_disciplina_solucao(solver, doc, dis, qtds_analisadas)
+            for comp in self.composicao_de_turma:
+                self.analise_disciplina_solucao(solver, doc, comp, qtds_analisadas)
 
             for c in conflitos:
 
-                if (self.disciplinas[c[0]].string_cod_turma() in doc.disciplinas and
-                    self.disciplinas[c[1]].string_cod_turma() in doc.disciplinas):
-                    doc.conflitos.append(self.disciplinas[c[0]].string_cod_turma())
-                    doc.conflitos.append(self.disciplinas[c[1]].string_cod_turma())
+                if (self.composicao_de_turma[c[0]].string_cod_turma() in doc.disciplinas and
+                    self.composicao_de_turma[c[1]].string_cod_turma() in doc.disciplinas):
+                    doc.conflitos.append(self.composicao_de_turma[c[0]].string_cod_turma())
+                    doc.conflitos.append(self.composicao_de_turma[c[1]].string_cod_turma())
 
         media_creditos = sum(qtds_analisadas["creditos_por_doc"])/len(self.docentes)
         variancia = sum((a-media_creditos)*(a-media_creditos) for a in qtds_analisadas["creditos_por_doc"])/(len(self.docentes)-1)
@@ -270,27 +295,27 @@ class distribuicao_graduacao:
             "3 - Média de créditos": math.trunc(media_creditos*100)/100,
             "4 - Desvio padrão": math.trunc(desvio_padrao*100)/100,
             "5 - Percentual de preferencias atendidas": str(math.trunc((total_pref/(len(self.docentes)*5))*10000)/100) + "%",
-            "6 - Percentual de aulas que eram preferidas": str(math.trunc((total_pref/len(self.disciplinas))*10000)/100) + "%",
+            "6 - Percentual de aulas que eram preferidas": str(math.trunc((total_pref/len(self.composicao_de_turma))*10000)/100) + "%",
             "7 - Percentual de preferencias de peso 5 atendidas": str(math.trunc((qtds_analisadas["pref"][4]/len(self.docentes))*10000)/100) + "%",
             "8 - Percentual de preferencias de peso 4 atendidas": str(math.trunc((qtds_analisadas["pref"][3]/len(self.docentes))*10000)/100) + "%",
             "9 - Percentual de preferencias de peso 3 atendidas": str(math.trunc((qtds_analisadas["pref"][2]/len(self.docentes))*10000)/100) + "%",
 
         } 
     
-    def analise_disciplina_solucao(self, solver, doc: docente, dis: disciplina, qtds_analisadas: dict):
-        if solver.Value(self.atribuicao[(doc.pos, dis.pos)]) == 1:
-            if dis.string_cod_turma() in doc.preferencia:
+    def analise_disciplina_solucao(self, solver, doc: docente, comp: disciplina, qtds_analisadas: dict):
+        if solver.Value(self.atribuicao[(doc.pos, comp.pos)]) == 1:
+            if comp.string_cod_turma() in doc.preferencia:
                 
-                pos_pref = self.peso_pra_posicao[doc.preferencia[dis.string_cod_turma()]]
+                pos_pref = self.peso_pra_posicao[doc.preferencia[comp.string_cod_turma()]]
                 qtds_analisadas["pref"][pos_pref] += 1
 
-                qtds_analisadas["pref_peso"] += doc.preferencia[dis.string_cod_turma()]
+                qtds_analisadas["pref_peso"] += doc.preferencia[comp.string_cod_turma()]
             
-            if dis.pos in self.ranking and doc == self.ranking[dis.pos][0]:
+            if comp.pos in self.ranking and doc == self.ranking[comp.pos][0]:
                 qtds_analisadas["primeiro_rank_att"] += 1
 
-            qtds_analisadas["creditos_por_doc"][-1] += dis.qtd_creditos
-            doc.disciplinas.append(dis.string_cod_turma())
+            qtds_analisadas["creditos_por_doc"][-1] += comp.qtd_creditos
+            doc.disciplinas.append(comp.string_cod_turma())
 
     def truncate(self, number, decimals=0):
         factor = 10 ** decimals
@@ -324,13 +349,15 @@ class distribuicao_graduacao:
         print("Resolvendo")
         am = array_manipulator()
         
-        self.disciplinas = am.dict_to_obj(disciplinas)
+        self.composicao_de_turma = am.dict_to_obj(disciplinas)
         self.docentes = am.dict_to_obj(docentes) 
 
         self.modelo = cp_model.CpModel()
         self.matriz_de_correlacao()  
         self.fixacao_pos_opt()    
+        self.cira_variaveis_de_agrupamento_de_composicoes()
 
+        self.res_tres_disciplina()
         self.res_limites_creditos()
         self.res_um_doc_por_dis()
         self.res_horario()
@@ -342,7 +369,6 @@ class distribuicao_graduacao:
         soma_opt += (self.opt_desempate() * self.peso_desempate)
 
         self.modelo.Maximize(soma_opt)
-
         return self.verifica_solucao()
     
     def valida(self, disciplinas, docentes, fixos):
@@ -419,7 +445,7 @@ class distribuicao_graduacao:
         
         for rank in self.ranking:
             lista_doc = self.ranking[rank]
-            disc = self.disciplinas[rank]
+            disc = self.composicao_de_turma[rank]
             disc_code = disc.string_cod_turma()
             ja_esta_no_topo = (disc_code in lista_doc[0].disciplinas)
             pos_rank_doc = self.acha_doc_que_leciona(lista_doc, disc_code)
