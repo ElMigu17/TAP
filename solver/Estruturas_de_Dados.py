@@ -40,11 +40,12 @@ class docente:
         if type(args[0]) == dict:
             self.dict_to_docente(args[0])
         else:
-            self.init_pequeno(args[0], args[1], args[2], args[3])
+            self.init_pequeno(args[0], args[1], args[2], args[3], args[4])
 
-    def init_pequeno(self, pos:int, nome: str, siape: int, reducao: int):
+    def init_pequeno(self, pos:int, nome: str, siape: int, reducao: int, turno_de_preferencia: str):
         self.pos = pos
         self.nome = nome
+        self.turno_de_preferencia = turno_de_preferencia
         self.id_de_nome = self.gera_id_de_nome(nome)
         self.siape = siape
         self.num_disc_anterior = 0

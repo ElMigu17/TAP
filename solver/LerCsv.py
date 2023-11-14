@@ -216,7 +216,7 @@ class leitor_csv:
 
             if not dosc_dados[2].isdigit():
                 reducao = int(dosc_dados[2].isdigit())
-            self.docentes.append(docente(index, dosc_dados[1], int(dosc_dados[0]), reducao))
+            self.docentes.append(docente(index, dosc_dados[1], int(dosc_dados[0]), reducao, dosc_dados[3]))
             self.siape_docente[dosc_dados[0]] = index
             index += 1 
 

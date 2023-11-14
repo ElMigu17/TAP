@@ -59,7 +59,6 @@ def importa_dados_disciplinas():
 
                 prox_disciplina = cria_prox_disciplina(dado)
             else:
-                print("horarionovo")
                 horarios = dado['Horário'].split(' - ')
                 prox_disciplina['horarios'].append({ "dia_semana": dia_num[dado['Dia']], "hora_inicio": horarios[0], "hora_fim": horarios[1]})          
                 prox_disciplina['qtd_creditos'] += descobre_qtd_creditos(horarios)
@@ -79,7 +78,7 @@ def importa_dados_profs():
         reducao = 0
         if not pd.isna(doscentes_dados.iloc[i]['Redução']):
             reducao = int(doscentes_dados.iloc[i]['Redução'])
-        docentes.append(docente(index, doscentes_dados.iloc[i]['Nome'], int(doscentes_dados.iloc[i]['SIAPE']), reducao))
+        docentes.append(docente(index, doscentes_dados.iloc[i]['Nome'], int(doscentes_dados.iloc[i]['SIAPE']), reducao, doscentes_dados.iloc[i]['Turno']))
         siape_docente[doscentes_dados.iloc[i]['SIAPE']] = index
         index += 1 
 
