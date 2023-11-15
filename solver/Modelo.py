@@ -183,34 +183,27 @@ class distribuicao_graduacao:
 
     def res_turno_escolhido(self):
         for doc in self.docentes:
-            if doc.turno_de_preferencia == "":
-                continue
-            elif doc.turno_de_preferencia == "N":
-                self.aux_noturno_res_turno_escolhido(doc)
+            if doc.turno_de_preferencia == "N":
+                self.aux_res_turno_escolhido(doc, self.possui_aula_no_turno_diurno)
             elif doc.turno_de_preferencia == "D":
-                self.aux_diurno_res_turno_escolhido(doc)
-            docents_groups = 0
-            for key in self.composicoes_por_disc:
-                docents_groups += self.atrib_grupos[(doc.pos, key)]
-            self.modelo.Add(docents_groups <= 3)
-
-    def aux_noturno_res_turno_escolhido(self, doc):
+                self.aux_res_turno_escolhido(doc, self.possui_aula_no_turno_noturno)
+            
+    def aux_res_turno_escolhido(self, doc, verifica_aula_turno_indesejado):
         for comp in self.composicao_de_turma:
-            infringe = False
-            for aula in comp.horarios:
-                if self.hora_para_float(aula["hora_fim"]) <= self.fim_turno_manha:
-                    infringe = True
-            if infringe:
+            if verifica_aula_turno_indesejado(comp):
                 self.modelo.Add(self.atribuicao[(doc.pos, comp.pos)] == 0)
 
-    def aux_diurno_res_turno_escolhido(self, doc):
-        for comp in self.composicao_de_turma:
-            infringe = False
-            for aula in comp.horarios:
-                if self.hora_para_float(aula["hora_inicio"]) >= self.fim_turno_manha:
-                    infringe = True
-            if infringe:
-                self.modelo.Add(self.atribuicao[(doc.pos, comp.pos)] == 0)
+    def possui_aula_no_turno_diurno(self, comp):
+        for aula in comp.horarios:
+            if self.hora_para_float(aula["hora_inicio"]) <= self.fim_turno_manha:
+                return True
+        return False
+
+    def possui_aula_no_turno_noturno(self, comp):
+        for aula in comp.horarios:
+            if self.hora_para_float(aula["hora_fim"]) >= self.inicio_turno_noite:
+                return True
+        return False
 
     def possui_prioridade(self, pre, doc: docente):
         return pre in doc.disc_per_1 and not ( pre in doc.disc_per_2 and pre in doc.disc_per_3 )

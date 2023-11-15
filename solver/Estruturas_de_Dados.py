@@ -5,7 +5,7 @@ import unidecode
 
 class disciplina:
     def __init__(self, *args) -> None:
-        if type(args[0]) == dict:
+        if isinstance(args[0], dict):
             self.dict_to_disciplina(args[0])
         else:
             self.init_pequeno(args[0], args[1], args[2], args[3], args[4], args[5])
@@ -37,7 +37,7 @@ class disciplina:
 
 class docente:
     def __init__(self, *args) -> None:
-        if type(args[0]) == dict:
+        if isinstance(args[0], dict):
             self.dict_to_docente(args[0])
         else:
             self.init_pequeno(args[0], args[1], args[2], args[3], args[4])
@@ -119,7 +119,7 @@ class array_manipulator:
 
     def save_as_json(self, array: list, saida: bool = False):
         nome_arquivo = "disciplina"
-        if type(array[0]) == docente:
+        if isinstance(array[0], docente):
             nome_arquivo = "docente"
 
         if saida:

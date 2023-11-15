@@ -23,7 +23,7 @@ class leitor_csv:
         self.nome_arquivo = ""
         self.traducao_de_peso = { 1: 30, 2: 50, 3: 200, 4: 500, 5: 1000 }
 
-    def cria_prox_disciplina(self, Dados_Gerais, i):
+    def cria_prox_disciplina(self, dados_gerais, i):
         def descobre_qtd_creditos(horarios):
             if(horarios[1].split(":")[1] == '50'):
                 return 1
@@ -39,8 +39,8 @@ class leitor_csv:
                                                         "linha": i})
                 i += 1
                 
-                while "\"" not in Dados_Gerais[i]:
-                    nome += Dados_Gerais[i]
+                while "\"" not in dados_gerais[i]:
+                    nome += dados_gerais[i]
                     i += 1
                 nome = nome.replace("\n", " ")
 
@@ -57,7 +57,7 @@ class leitor_csv:
             
             return nome, i
         
-        dado = Dados_Gerais[i]
+        dado = dados_gerais[i]
         try:
             dia_semana = self.get_pos_weekday(dado[5])
             docente_nome, i = pega_docente_nome(dado[14], i)
@@ -72,8 +72,8 @@ class leitor_csv:
         aux_disciplina['docente'] = docente_nome
         aux_disciplina['qtd_creditos'] = descobre_qtd_creditos(horarios)
         i += 1
-        while i < len(Dados_Gerais) and len(Dados_Gerais[i]) >2 and Dados_Gerais[i][0] == '':
-            aux_disciplina['turmas'].append(Dados_Gerais[i][7])
+        while i < len(dados_gerais) and len(dados_gerais[i]) >2 and dados_gerais[i][0] == '':
+            aux_disciplina['turmas'].append(dados_gerais[i][7])
             i += 1
 
         return aux_disciplina, i
@@ -89,24 +89,24 @@ class leitor_csv:
     def num_ou_zero(self, num):
         try:
             return int(num)
-        except:
+        except ValueError:
             return 0
 
     def importa_dados_disciplinas(self, caminho_arquivo):
-        Dados_Gerais = ""
+        dados_gerais = ""
         with open(caminho_arquivo, 'r') as file:
-            Dados_Gerais = file.read()
-        Dados_Gerais = Dados_Gerais.split("\n")
-        Dados_Gerais = list(map(lambda d: d.split(","),Dados_Gerais))
-        if not Dados_Gerais[0][0].isdigit():
-            Dados_Gerais.pop(0)
+            dados_gerais = file.read()
+        dados_gerais = dados_gerais.split("\n")
+        dados_gerais = list(map(lambda d: d.split(","),dados_gerais))
+        if not dados_gerais[0][0].isdigit():
+            dados_gerais.pop(0)
 
         aux_disciplina = {}
         id_i = 0
         
-        prox_disciplina, index = self.cria_prox_disciplina(Dados_Gerais, 0)
-        while len(Dados_Gerais) > index and len(Dados_Gerais[index]) > 2:
-            aux_disciplina, index = self.cria_prox_disciplina(Dados_Gerais, index)
+        prox_disciplina, index = self.cria_prox_disciplina(dados_gerais, 0)
+        while len(dados_gerais) > index and len(dados_gerais[index]) > 2:
+            aux_disciplina, index = self.cria_prox_disciplina(dados_gerais, index)
             if(aux_disciplina["disciplina"] == prox_disciplina["disciplina"] and 
                aux_disciplina["turmas"] == prox_disciplina["turmas"]):
 
@@ -132,14 +132,14 @@ class leitor_csv:
             prox_disciplina['turmas']))
 
     def disciplinas_lecionadas_anteriormente(self, caminho_arquivo, semestre):
-        Dados_Gerais = ""
+        dados_gerais = ""
         self.docentes_not_found[semestre] = []
         with open(caminho_arquivo, 'r') as file:
-            Dados_Gerais = file.read()
-        Dados_Gerais = Dados_Gerais.split("\n")
-        Dados_Gerais = list(map(lambda d: d.split(","),Dados_Gerais))
-        if not Dados_Gerais[0][0].isdigit():
-            Dados_Gerais.pop(0)
+            dados_gerais = file.read()
+        dados_gerais = dados_gerais.split("\n")
+        dados_gerais = list(map(lambda d: d.split(","),dados_gerais))
+        if not dados_gerais[0][0].isdigit():
+            dados_gerais.pop(0)
 
         aux_disciplina = {}
         id_i = 0      
@@ -184,13 +184,12 @@ class leitor_csv:
             
 
         
-        prox_disciplina, index = self.cria_prox_disciplina(Dados_Gerais, 0)
-        while len(Dados_Gerais) > index and len(Dados_Gerais[index]) > 2:
-            aux_disciplina, index = self.cria_prox_disciplina(Dados_Gerais, index)
+        prox_disciplina, index = self.cria_prox_disciplina(dados_gerais, 0)
+        while len(dados_gerais) > index and len(dados_gerais[index]) > 2:
+            aux_disciplina, index = self.cria_prox_disciplina(dados_gerais, index)
             if(aux_disciplina["disciplina"] == prox_disciplina["disciplina"] and 
                aux_disciplina["turmas"] == prox_disciplina["turmas"]):
                 aux_disciplina = {}
-                continue
             
             else:
                 tenta_add_turma_a_docente(prox_disciplina, index)
@@ -245,20 +244,20 @@ class leitor_csv:
             index += 1
         
     def importa_preferencias(self, caminho_arquivo):
-        Preferencias = ""
+        preferencias = ""
 
         with open(caminho_arquivo, 'r') as file:
-            Preferencias = file.read()
-        Preferencias = Preferencias.split("\n")
-        Preferencias = list(map(lambda d: d.split(","),Preferencias))
-        peso = Preferencias.pop(0)
+            preferencias = file.read()
+        preferencias = preferencias.split("\n")
+        preferencias = list(map(lambda d: d.split(","),preferencias))
+        peso = preferencias.pop(0)
         peso.pop(0)
         i = 0
-        while len(Preferencias[i]) > 2 and len(Preferencias) > i:
+        while len(preferencias[i]) > 2 and len(preferencias) > i:
             j = 1
-            pos_docente_atual = self.siape_docente[Preferencias[i][0]]
-            while len(Preferencias[i]) > j:
-                self.docentes[pos_docente_atual].add_preferencia(self.traducao_de_peso[j], Preferencias[i][j])
+            pos_docente_atual = self.siape_docente[preferencias[i][0]]
+            while len(preferencias[i]) > j:
+                self.docentes[pos_docente_atual].add_preferencia(self.traducao_de_peso[j], preferencias[i][j])
                 j += 1
             i += 1
 
