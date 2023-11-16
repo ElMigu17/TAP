@@ -227,35 +227,45 @@ function solver(e){
             if(response == 'No solution found'){
                 alert("Não foi encontrada solução")
             }
-            else if(typeof response == typeof Object()){
-                if("erro" in response){
-                    alert(response["erro"])
-                }
-                else{
-                    let response_str = ''
-                    for(let i in response){
-                        response_str += '\n' + i;
-                        let turmas_str = '';
-                        for(let j in response[i]){
-                            turmas_str += response[i][j] + ", "
-                        }
-
-                        response_str += ': ' + turmas_str
-                    }
-
-                    alert("Na hora de fazer a leitura dos arquivos csv, algumas materias antigas aparentemente não foram lecionadas por docentes que lecionarão na solução ou houve uma confusão por haverem nomes indistinguiveis (como Fulano, Fulano de Tal e Fulano Silva). Isso pode ter ocorrido devido a um erro na escrita do nome do doscente. Com isso, segue a lista para futura verificação: \n" + response_str)
-                }
-            } 
             else{
-                get_dados_solucao();
-                verifica_existencia_arquivo();
-                setTimeout(() => materias_liberadas(), 500);
+                process_solution_feedback(response)
             }
         },
         error: function(xhr, status, error) {
             console.error(error);
         }
     });
+}
+
+function process_solution_feedback(response){
+    if(typeof response === typeof Object()){
+        if("erro" in response){
+            alert(response["erro"])
+            return;
+        }
+        else{
+            let response_str = ''
+            for(let i in response){
+                response_str += '\n' + i;
+                let turmas_str = '';
+                for(let j in response[i]){
+                    turmas_str += response[i][j] + ", "
+                }
+                response_str += ': ' + turmas_str
+            }
+            alert("Na hora de fazer a leitura dos arquivos csv, algumas materias antigas aparentemente não foram lecionadas por docentes que lecionarão na solução ou houve uma confusão por haverem nomes indistinguiveis (como Fulano, Fulano de Tal e Fulano Silva). Isso pode ter ocorrido devido a um erro na escrita do nome do doscente. Com isso, segue a lista para futura verificação: \n" + response_str)
+        }
+    }
+    get_dados_solucao();
+    verifica_existencia_arquivo();
+    setTimeout(() => {
+        materias_liberadas()
+        const docente_selecionado = document.getElementById("nome_docentes").value;
+        if (docente_selecionado != ""){
+            limapr_tabela();
+            mostra_disciplinas_docente(docente_selecionado)
+        }
+    }, 500);
 }
 
     //Analise de solução
@@ -454,7 +464,7 @@ function validar_solucao(){
         data: JSON.stringify({"pares_restricao": par_disc_doc_obrigatorio_para_envio}),
         contentType: 'application/json;charset=UTF-8',
         success: function(response) {
-            console.log(response)
+
             if(response == 'No solution found'){
                 alert("Não foi encontrada solução")
             }
@@ -520,8 +530,8 @@ function mostra_disciplinas_docente(nome_docente){
     while(i < dados_solucao.length && dados_solucao[i]["nome"] != nome_docente){
         i++;
     }
-
-    if(i < dados_solucao.length){
+    
+        if(i < dados_solucao.length){
         let dados_disciplina = dados_solucao[i]["disciplinas_dados"]
         for(const dis of dados_disciplina){
             for(const horario of dis["horarios"]){
@@ -575,7 +585,6 @@ function formata_nome(nome){
     let array_nome = nome.split(" ");
     let nome_formatado = array_nome.pop(0) + " ";
 
-    console.log(array_nome, nome_formatado)
     for (const sobrenome of array_nome){
         nome_formatado = nome_formatado + sobrenome[0] + "."
     }
