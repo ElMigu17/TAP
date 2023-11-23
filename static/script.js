@@ -594,18 +594,14 @@ function formata_nome(nome){
 
 function organiza_tabelas_preferencias(){
     let largura_disponivel = $(window).width()-180-43
-    let qtd_profs = Math.trunc(largura_disponivel/142)
-    let qtd_tabelas = Math.trunc(dados_solucao.length/qtd_profs)
+    let qtd_col = Math.trunc(largura_disponivel/142)
+    let qtd_tabelas = Math.ceil(dados_solucao.length/qtd_col)
 
-    if(qtd_tabelas !== Math.trunc(qtd_tabelas)){
-        qtd_tabelas = Math.trunc(qtd_tabelas)
-        qtd_tabelas++
-    }
     document.getElementById("tabela_preferencias").innerHTML = "";
     
     for(let i=1; i<=qtd_tabelas; i++){
-        let inicio = (i-1)*qtd_profs
-        let fim = i*qtd_profs
+        let inicio = (i-1)*qtd_col
+        let fim = i*qtd_col
         let dados_sliced = dados_solucao.slice(inicio, fim)
         let tabela = document.createElement('table');
         
