@@ -10,7 +10,7 @@ app = Flask(__name__)
 arr_man = array_manipulator()
 
 PREFERENCIAS_HEAD_CSV = 'Peso,1,2,3,4,5'
-DOSCENTES_HEAD_CSV = 'SIAPE,Nome,Redução'
+DOSCENTES_HEAD_CSV = 'SIAPE,Nome,Redução,Turno'
 DISCIPLINAS_HEAD_CSV = 'Disciplina,Local,Tipo,Tempo,Período,Dia,Horário,Turma,Vagas Normais,Vagas Reservadas para Calouros,Vagas para Matrícula Especial,Total Vagas Normais,Total Vagas Reservadas para Calouros,Total Vagas para Matrícula Especial,Docente,'
 QTD_FIM_ULTIMO_SEMESTRE = 'SIAPE,Professores,Créditos,Número de Disciplinas,nº estudantes fim de período'
 
