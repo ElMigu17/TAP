@@ -140,13 +140,13 @@ def solver(tipo_arquivo):
 @app.route('/docentes-info')
 def docentes_info():
     try:
-        with open(ARQ_SOLUCAO, 'r') as file:
-            docentes = json.load(file)
         with open(ARQ_DADO_SOLUCAO, 'r') as file:
             dados_solucao = json.load(file)
+        with open(ARQ_SOLUCAO, 'r') as file:
+            docentes = json.load(file)
         with open(ARQ_DISCIPLINA, 'r') as file:
             disciplinas = json.load(file)
-    except:
+    except FileNotFoundError:
         return 'Arquivo de disciplina e/ou o solucao da otimização não estão presentes'
 
     dic_obj = arr_man.dict_to_obj(disciplinas)
@@ -164,7 +164,7 @@ def erros_de_leitura():
     try:
         with open(DIR_DATA + 'erros.json', 'r') as file:
             incoerencias = json.load(file)
-    except:
+    except FileNotFoundError:
         return 'Arquivo de erros não está presentes'
 
     return {'incoerencias': incoerencias}
