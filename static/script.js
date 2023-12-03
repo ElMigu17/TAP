@@ -223,13 +223,8 @@ function solver(e){
         url: "solver/" + tipo_arquivo,
         processData: false,
         contentType: false,
-        success: function(response) {
-            if(response == 'No solution found'){
-                alert("Não foi encontrada solução")
-            }
-            else{
-                process_solution_feedback(response)
-            }
+        success: function(response) {    
+            process_solution_feedback(response);
         },
         error: function(xhr, status, error) {
             console.error(error);
@@ -238,7 +233,11 @@ function solver(e){
 }
 
 function process_solution_feedback(response){
-    if(typeof response === typeof Object()){
+    if(response == 'No solution found'){
+        alert("Não foi encontrada solução")
+        return;
+    }
+    else if(typeof response === typeof Object()){
         if("erro" in response){
             alert(response["erro"])
             return;
@@ -255,6 +254,7 @@ function process_solution_feedback(response){
             }
             alert("Na hora de fazer a leitura dos arquivos csv, algumas materias antigas aparentemente não foram lecionadas por docentes que lecionarão na solução ou houve uma confusão por haverem nomes indistinguiveis (como Fulano, Fulano de Tal e Fulano Silva). Isso pode ter ocorrido devido a um erro na escrita do nome do doscente. Com isso, segue a lista para futura verificação: \n" + response_str)
         }
+        return;
     }
     get_dados_solucao();
     verifica_existencia_arquivo();
@@ -262,7 +262,7 @@ function process_solution_feedback(response){
         materias_liberadas()
         const docente_selecionado = document.getElementById("nome_docentes").value;
         if (docente_selecionado != ""){
-            limapr_tabela();
+            limpar_tabela();
             mostra_disciplinas_docente(docente_selecionado)
         }
     }, 500);
@@ -387,7 +387,7 @@ function cria_info_erro(erros){
 //Tabela Professores
     //Select
 function select_docente(docente){
-    limapr_tabela();
+    limpar_tabela();
     mostra_disciplinas_docente(docente.target.value);
 }
 
@@ -410,11 +410,11 @@ function coloca_nome_no_select(){
 function alternar_mudanca_conflito(){
     mostra_conflito = !mostra_conflito;
     if(document.getElementById("nome_docentes").selectedOptions[0] != undefined){
-        nome_docente = document.getElementById("nome_docentes").selectedOptions[0].value;
+        const nome_docente = document.getElementById("nome_docentes").selectedOptions[0].value;
         mostra_disciplinas_docente(nome_docente);
     }
     coloca_nome_no_select();
-    limapr_tabela();
+    limpar_tabela();
 }
     //Find class
 function acha_cod_por_parte(){
@@ -464,34 +464,7 @@ function validar_solucao(){
         data: JSON.stringify({"pares_restricao": par_disc_doc_obrigatorio_para_envio}),
         contentType: 'application/json;charset=UTF-8',
         success: function(response) {
-
-            if(response == 'No solution found'){
-                alert("Não foi encontrada solução")
-            }
-            else if(typeof response == typeof Object()){
-                if("erro" in response){
-                    alert(response["erro"])
-                }
-                else{
-                    response_str = ''
-                    for(let i in response){
-                        response_str += '\n' + i;
-                        turmas_str = '';
-                        for(let j in response[i]){
-                            turmas_str += response[i][j] + ", "
-                        }
-
-                        response_str += ': ' + turmas_str
-                    }
-
-                    alert("Na hora de fazer a leitura dos arquivos csv, algumas materias antigas aparentemente não foram lecionadas por docentes que lecionarão na solução ou houve uma confusão por haverem nomes indistinguiveis (como Fulano, Fulano de Tal e Fulano Silva). Isso pode ter ocorrido devido a um erro na escrita do nome do doscente. Com isso, segue a lista para futura verificação: \n" + response_str)
-                }
-            } 
-            else{
-                get_dados_solucao();
-                verifica_existencia_arquivo();
-                setTimeout(() => materias_liberadas(), 500);
-            }
+            process_solution_feedback(response);
         },
         error: function(xhr, status, error) {
             console.error(xhr, status, error);
@@ -559,7 +532,7 @@ function adiciona_horario_na_tabela(tabela, horario, dis){
     }
 }
 
-function limapr_tabela(){
+function limpar_tabela(){
     let tabela = document.getElementById("horario");
 
     for(let i=1; i<17; i++){
@@ -678,7 +651,7 @@ function materias_serao_foram_liberadas(periodo_3, periodo_2, periodo_1, id){
     document.getElementById(id).innerHTML = ""
     let lista = document.getElementById(id)
 
-    for(i in disciplinas_liberadas){
+    for(let i in disciplinas_liberadas){
         let novo_item = document.createElement('li') 
         novo_item.innerHTML = disciplinas_liberadas[i]
         lista.appendChild(novo_item)
