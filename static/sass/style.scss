@@ -167,7 +167,9 @@ html{
             font-size: 12px;
             font-family: sans-serif;
 
-            img{
+            i {
+                height: 15px;
+                width: 15px;
                 margin-right: 5px;
             }
         }
@@ -175,12 +177,18 @@ html{
             color: #842029;
             border-color: #842029;
             background-color: #F5C2C7;
+            i {
+                background: url('../X.svg');
+            }
 
         }
         .presente{
             color: #0F5132;
             border-color: #0F5132;
             background-color: #D1E7DD;
+            i {
+                background: url('../Check.svg');
+            }
         }
     }
 

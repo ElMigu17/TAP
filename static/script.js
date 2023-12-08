@@ -174,13 +174,11 @@ function atualiza_situacao_arquivos(exist, element){
         element.classList.remove("ausente");
         element.classList.add("presente");
         element.innerHTML = element.innerHTML.replace("ausente", "presente");
-        element.children[0].src = element.children[0].src.replace("X", "Check");
     }
     else{
         element.classList.remove("presente");
         element.classList.add("ausente");
         element.innerHTML = element.innerHTML.replace("presente", "ausente");
-        element.children[0].src = element.children[0].src.replace("Check", "X");
     }
 }
 
