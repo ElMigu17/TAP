@@ -76,12 +76,13 @@ def enviar_file(request, file_name, tipo_arquivo):
             json_object = json.loads(data)
 
             if item_arquivo_json[file_name] in json_object[0]:
-                with open(DIR_DATA + file_name + '.json', 'w') as file:
+                with open(DIR_DATA + file_name + '.json', 'w', newline='') as file:
                     json.dump(json_object, file)
                 return 'null'
         else:
-            if data.split('\n')[0] == NOME_ARQUIVO_HEAD_CSV[file_name]:
-                with open(DIR_DATA + file_name + '.csv', 'w') as file:
+            file_head = data.split('\n')[0].replace("\n","").replace("\r","")
+            if file_head == NOME_ARQUIVO_HEAD_CSV[file_name]:
+                with open(DIR_DATA + file_name + '.csv', 'w', newline='') as file:
                     file.write(data)
                 return 'null'
         return file_name
@@ -112,26 +113,26 @@ def solver(tipo_arquivo):
         
         am = array_manipulator()
         docentes = am.array_object_to_dict(leitor.docentes)
-        with open(ARQ_DOCENTE, 'w') as file:
+        with open(ARQ_DOCENTE, 'w', newline='') as file:
             json.dump(docentes, file)
 
 
         disciplinas = am.array_object_to_dict(leitor.disciplinas)
-        with open(ARQ_DISCIPLINA, 'w') as file:
+        with open(ARQ_DISCIPLINA, 'w', newline='') as file:
             json.dump(disciplinas, file)
 
-    with open(ARQ_DOCENTE, 'r') as file:
+    with open(ARQ_DOCENTE, 'r', newline='') as file:
         docentes = json.load(file)
 
-    with open(ARQ_DISCIPLINA, 'r') as file:
+    with open(ARQ_DISCIPLINA, 'r', newline='') as file:
         disciplinas = json.load(file)
 
     dados_solucao = dist_grad.main(disciplinas, docentes)
 
     if dados_solucao:
-        with open(ARQ_SOLUCAO, 'w') as file:
+        with open(ARQ_SOLUCAO, 'w', newline='') as file:
             json.dump(arr_man.array_object_to_dict(dist_grad.docentes), file)
-        with open(ARQ_DADO_SOLUCAO, 'w') as file:
+        with open(ARQ_DADO_SOLUCAO, 'w', newline='') as file:
             json.dump(dados_solucao, file)
     else:
         return 'No solution found'
@@ -140,11 +141,11 @@ def solver(tipo_arquivo):
 @app.route('/docentes-info')
 def docentes_info():
     try:
-        with open(ARQ_DADO_SOLUCAO, 'r') as file:
+        with open(ARQ_DADO_SOLUCAO, 'r', newline='') as file:
             dados_solucao = json.load(file)
-        with open(ARQ_SOLUCAO, 'r') as file:
+        with open(ARQ_SOLUCAO, 'r', newline='') as file:
             docentes = json.load(file)
-        with open(ARQ_DISCIPLINA, 'r') as file:
+        with open(ARQ_DISCIPLINA, 'r', newline='') as file:
             disciplinas = json.load(file)
     except FileNotFoundError:
         return 'Arquivo de disciplina e/ou o solucao da otimização não estão presentes'
@@ -162,7 +163,7 @@ def docentes_info():
 @app.route('/erros-de-leitura')
 def erros_de_leitura():
     try:
-        with open(DIR_DATA + 'erros.json', 'r') as file:
+        with open(DIR_DATA + 'erros.json', 'r', newline='') as file:
             incoerencias = json.load(file)
     except FileNotFoundError:
         return 'Arquivo de erros não está presentes'
@@ -203,9 +204,9 @@ def converter_scss():
     sass.compile(dirname=('static/sass', 'static/css'), output_style='compressed')
 
 def converte_solucao_csv():
-    with open(ARQ_SOLUCAO, 'r') as file:
+    with open(ARQ_SOLUCAO, 'r', newline='') as file:
         solucao_json = json.load(file)
-    with open(DIR_DATA + 'disciplinas_prox.csv', 'r') as file:
+    with open(DIR_DATA + 'disciplinas_prox.csv', 'r', newline='') as file:
         dados_gerais = file.read()
     dados_output = ''
     novos_dados = dados_gerais.split('\n')
@@ -244,7 +245,7 @@ def converte_solucao_csv():
         dados_output = dados_output[:-1]
         dados_output += '\n'
 
-    with open(DIR_DATA + 'solucao.csv', 'w') as file:
+    with open(DIR_DATA + 'solucao.csv', 'w', newline='') as file:
         file.write(dados_output)
 
 
@@ -257,18 +258,18 @@ def validar_solucao():
     retorno = 'Optimization'
     dist_grad = distribuicao_graduacao()
 
-    with open(ARQ_DOCENTE, 'r') as file:
+    with open(ARQ_DOCENTE, 'r', newline='') as file:
         docentes = json.load(file)
 
-    with open(ARQ_DISCIPLINA, 'r') as file:
+    with open(ARQ_DISCIPLINA, 'r', newline='') as file:
         disciplinas = json.load(file)
 
     dados_solucao = dist_grad.valida(disciplinas, docentes, pares_restricao)
 
     if dados_solucao:
-        with open(ARQ_SOLUCAO, 'w') as file:
+        with open(ARQ_SOLUCAO, 'w', newline='') as file:
             json.dump(arr_man.array_object_to_dict(dist_grad.docentes), file)
-        with open(ARQ_DADO_SOLUCAO, 'w') as file:
+        with open(ARQ_DADO_SOLUCAO, 'w', newline='') as file:
             json.dump(dados_solucao, file)
     else:
         return 'No solution found'
@@ -280,7 +281,6 @@ if __name__ == '__main__':
     if not os.path.exists(newpath):
         os.makedirs(newpath)
     app.run(debug=True)
-
 
 
 #https://sass.github.io/libsass-python/index.html
