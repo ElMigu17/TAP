@@ -5,3 +5,4 @@ regex
 Unidecode
 Werkzeug
 libsass
+gunicorn
