@@ -5,6 +5,8 @@ from solver.Estruturas_de_Dados import array_manipulator
 from solver.LerCsv import leitor_csv
 import sass
 import os
+from io import BytesIO
+from zipfile import ZipFile
 
 app = Flask(__name__)
 arr_man = array_manipulator()
@@ -15,6 +17,7 @@ DISCIPLINAS_HEAD_CSV = 'Disciplina,Local,Tipo,Tempo,Período,Dia,Horário,Turma,
 QTD_FIM_ULTIMO_SEMESTRE = 'SIAPE,Professores,Créditos,Número de Disciplinas,nº estudantes fim de período'
 
 DIR_DATA = 'data/'
+DIR_DATA_EXAMPLE = 'dados_exemplo/'
 ARQ_DISCIPLINA = DIR_DATA + 'disciplinas.json'
 ARQ_DOCENTE = DIR_DATA + 'docentes.json'
 ARQ_SOLUCAO = DIR_DATA + 'solucao.json'
@@ -29,6 +32,16 @@ NOME_ARQUIVO_HEAD_CSV = {
     'penultimo_semestre': DISCIPLINAS_HEAD_CSV,
     'antipenultimo_semestre': DISCIPLINAS_HEAD_CSV
 }
+
+EXAMPLE_FILES = [DIR_DATA_EXAMPLE + '1docentes.csv', 
+    DIR_DATA_EXAMPLE + '2disciplinas_prox_semestre.csv', 
+    DIR_DATA_EXAMPLE + '3qtds_ultimo_semestre.csv',
+    DIR_DATA_EXAMPLE + '4preferenciassaida.csv',
+    DIR_DATA_EXAMPLE + '5ultimo_semestre.csv',
+    DIR_DATA_EXAMPLE + '6penultimo_semestre.csv', 
+    DIR_DATA_EXAMPLE + '7antipenultimo_semestre.csv'
+]
+
 
 item_arquivo_json = {
     'disciplinas': 'codigo',
@@ -199,6 +212,34 @@ def download_file(tipo_arquivo):
 
     PATH=DIR_DATA + 'solucao.' + tipo_arquivo
     return send_file(PATH,as_attachment=True, download_name=('distribuicao_prox_semestre.' + tipo_arquivo))
+
+@app.route('/download_example_files')
+def download_example_files():
+
+    target = 'dir1/dir2'
+
+    stream = BytesIO()
+    with ZipFile(stream, 'w') as zf:
+        for file in EXAMPLE_FILES:
+            zf.write(file, os.path.basename(file))
+    stream.seek(0)
+
+    return send_file(
+        stream,
+        as_attachment=True,
+        download_name='archive.zip'
+    )
+
+
+
+
+
+    files = []
+    for file in EXAMPLE_FILES:
+        files.append(send_file(file,as_attachment=True, download_name=(file)))
+    
+    return files
+
 
 def converter_scss():
     sass.compile(dirname=('static/sass', 'static/css'), output_style='compressed')

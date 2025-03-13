@@ -1,368 +1,241 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
-  </head>
-  <body>
-    <div
-      onclick="fecha_erros_de_leitura(event)"
-      class="deixa-cinza"
-      id="erros-de-leitura"
-    >
-      <div class="erros-de-leitura" id="erros-de-leitura-interno"></div>
-    </div>
 
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+</head>
+
+<body>
+  <div onclick="fecha_erros_de_leitura(event)" class="deixa-cinza" id="erros-de-leitura">
+    <div class="erros-de-leitura" id="erros-de-leitura-interno"></div>
+  </div>
+
+  <div class="center-header">
     <div class="pos-toggle">
       <div id="toggle-file-type">
         <p>.json</p>
         <label class="switch">
-          <input
-            onclick="alternar_tipo_arquivo()"
-            type="checkbox"
-            id="toggle"
-            checked
-          />
+          <input onclick="alternar_tipo_arquivo()" type="checkbox" id="toggle" checked />
           <span class="slider round"></span>
         </label>
         <p>.csv</p>
       </div>
+
+
+      <a class="botao" href="{{url_for('download_example_files')}}">Download dados de exemplo</a>
+    </div>
+  </div>
+
+  <div class="centraliza">
+    <div class="painel_arquivos">
+      <hr class="linha_painel" />
+      <form id="envioArquivos">
+        <div class="json">
+          <h3>Enviar arquivo do tipo json com os dados:</h3>
+
+          <p class="label-file">Disciplinas:</p>
+          <div class="label-input-file">
+            <label for="disciplinas" class="label-selecao-arquivo botao" ondragover="arquivo_emcima(event)"
+              ondragleave="arquivo_nao_emcima(this)" ondrop="arquivo_caiu(event)">Selecionar arquivo</label>
+            <input type="file" id="disciplinas" class="botao-selecao-arquivo" name="disciplinas" accept=".json" />
+            <div>Arquivo enviado</div>
+          </div>
+
+          <p class="label-file">Docentes:</p>
+          <div class="label-input-file">
+            <label for="docentes" class="label-selecao-arquivo botao" ondragover="arquivo_emcima(event)"
+              ondragleave="arquivo_nao_emcima(this)" ondrop="arquivo_caiu(event)">Selecionar arquivo</label>
+            <input type="file" id="docentes" class="botao-selecao-arquivo" name="docentes" placeholder="Escolher"
+              accept=".json" />
+            <div>Arquivo enviado</div>
+          </div>
+
+          <div class="botoes-de-solucao">
+            <button onclick="solver(event)" class="botao">Resolver</button>
+          </div>
+
+          <label class="download-label" for="export">Download json da distribuição desse semestre:</label><br />
+          <a class="botao" href="{{url_for('download_file', tipo_arquivo = 'json')}}">Download</a>
+        </div>
+
+        <div class="csv">
+          <h3>Enviar arquivo do tipo csv com os dados:</h3>
+
+          <p class="label-file">Docentes no próximo semestre:</p>
+          <div class="label-input-file">
+            <label for="docentes_csv" class="botao" ondragover="arquivo_emcima(event)"
+              ondragleave="arquivo_nao_emcima(this)" ondrop="arquivo_caiu(event)">Selecionar arquivo</label>
+            <input type="file" id="docentes_csv" name="docentes_csv" class="botao-selecao-arquivo" accept=".csv" />
+            <div>Arquivo enviado</div>
+          </div>
+
+          <p class="label-file">Disciplinas no próximo semestre:</p>
+          <div class="label-input-file">
+            <label for="disciplinas_prox" class="botao" ondragover="arquivo_emcima(event)"
+              ondragleave="arquivo_nao_emcima(this)" ondrop="arquivo_caiu(event)">Selecionar arquivo</label>
+            <input type="file" id="disciplinas_prox" name="disciplinas_prox" class="botao-selecao-arquivo"
+              accept=".csv" />
+            <div>Arquivo enviado</div>
+          </div>
+
+          <p class="label-file">Quantidades do final do ultimo semestre:</p>
+          <div class="label-input-file">
+            <label for="qtd_fim_ultimo_semestre" class="botao" ondragover="arquivo_emcima(event)"
+              ondragleave="arquivo_nao_emcima(this)" ondrop="arquivo_caiu(event)">Selecionar arquivo</label>
+            <input type="file" id="qtd_fim_ultimo_semestre" name="qtd_fim_ultimo_semestre" class="botao-selecao-arquivo"
+              accept=".csv" />
+            <div>Arquivo enviado</div>
+          </div>
+
+          <p class="label-file">Preferencias:</p>
+          <div class="label-input-file">
+            <label for="preferencias" class="botao" ondragover="arquivo_emcima(event)"
+              ondragleave="arquivo_nao_emcima(this)" ondrop="arquivo_caiu(event)">Selecionar arquivo</label>
+            <input type="file" id="preferencias" name="preferencias" class="botao-selecao-arquivo" accept=".csv" />
+            <div>Arquivo enviado</div>
+          </div>
+
+          <p class="label-file">Ultimo semestre:</p>
+          <div class="label-input-file">
+            <label for="ultimo_semestre" class="botao" ondragover="arquivo_emcima(event)"
+              ondragleave="arquivo_nao_emcima(this)" ondrop="arquivo_caiu(event)">Selecionar arquivo</label>
+            <input type="file" id="ultimo_semestre" name="ultimo_semestre" class="botao-selecao-arquivo"
+              accept=".csv" />
+            <div>Arquivo enviado</div>
+          </div>
+
+          <p class="label-file">Penultimo semestre:</p>
+          <div class="label-input-file">
+            <label for="penultimo_semestre" class="botao" ondragover="arquivo_emcima(event)"
+              ondragleave="arquivo_nao_emcima(this)" ondrop="arquivo_caiu(event)">Selecionar arquivo</label>
+            <input type="file" id="penultimo_semestre" name="penultimo_semestre" class="botao-selecao-arquivo"
+              accept=".csv" />
+            <div>Arquivo enviado</div>
+          </div>
+
+          <p class="label-file">Antipenultimo semestre:</p>
+          <div class="label-input-file">
+            <label for="antipenultimo_semestre" class="botao" ondragover="arquivo_emcima(event)"
+              ondragleave="arquivo_nao_emcima(this)" ondrop="arquivo_caiu(event)">Selecionar arquivo</label>
+            <input type="file" id="antipenultimo_semestre" name="antipenultimo_semestre" class="botao-selecao-arquivo"
+              accept=".csv" />
+            <div>Arquivo enviado</div>
+          </div>
+
+          <div class="botoes-de-solucao">
+            <button onclick="solver(event)" class="botao">Resolver</button>
+          </div>
+          <button onclick="erros_de_leitura(event)" class="botao">
+            Erros de leitura
+          </button>
+
+          <label class="download-label" for="export">Download csv da distribuição desse semestre:</label><br />
+          <a class="botao" href="{{url_for('download_file', tipo_arquivo = 'csv')}}">Download</a>
+        </div>
+      </form>
+
+      <div id="presenca-de-arquivo">
+        <div class="json">
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de disciplina ausente
+          </div>
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de docentes ausente
+          </div>
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de solução ausente
+          </div>
+        </div>
+        <div class="csv">
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de professores ausente
+          </div>
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de disciplinas no próximo
+            semestre ausente
+          </div>
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de quantidades do final do
+            ultimo semestre ausente
+          </div>
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de preferencias ausente
+          </div>
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de ultimo semestre ausente
+          </div>
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de penultimo semestre ausente
+          </div>
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de antipenultimo semestre
+            ausente
+          </div>
+          <div class="ausente">
+            <img src="static/X.svg" />Arquivo de solução da otimização ausente
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="centraliza">
-      <div class="painel_arquivos">
-        <hr class="linha_painel" />
-        <form id="envioArquivos">
-          <div class="json">
-            <h3>Enviar arquivo do tipo json com os dados:</h3>
+    <div id="dados_solucao">
+      <h3>Dados da otimização encontrada:</h3>
+    </div>
 
-            <p class="label-file">Disciplinas:</p>
-            <div class="label-input-file">
-              <label
-                for="disciplinas"
-                class="label-selecao-arquivo botao"
-                ondragover="arquivo_emcima(event)"
-                ondragleave="arquivo_nao_emcima(this)"
-                ondrop="arquivo_caiu(event)"
-                >Selecionar arquivo</label
-              >
-              <input
-                type="file"
-                id="disciplinas"
-                class="botao-selecao-arquivo"
-                name="disciplinas"
-                accept=".json"
-              />
-              <div>Arquivo enviado</div>
-            </div>
-
-            <p class="label-file">Docentes:</p>
-            <div class="label-input-file">
-              <label
-                for="docentes"
-                class="label-selecao-arquivo botao"
-                ondragover="arquivo_emcima(event)"
-                ondragleave="arquivo_nao_emcima(this)"
-                ondrop="arquivo_caiu(event)"
-                >Selecionar arquivo</label
-              >
-              <input
-                type="file"
-                id="docentes"
-                class="botao-selecao-arquivo"
-                name="docentes"
-                placeholder="Escolher"
-                accept=".json"
-              />
-              <div>Arquivo enviado</div>
-            </div>
-
-            <div class="botoes-de-solucao">
-              <button onclick="solver(event)" class="botao">Resolver</button>
-            </div>
-
-            <label class="download-label" for="export"
-              >Download json da distribuição desse semestre:</label
-            ><br />
-            <a
-              class="botao"
-              href="{{url_for('download_file', tipo_arquivo = 'json')}}"
-              >Download</a
-            >
-          </div>
-
-          <div class="csv">
-            <h3>Enviar arquivo do tipo csv com os dados:</h3>
-
-            <p class="label-file">Docentes no próximo semestre:</p>
-            <div class="label-input-file">
-              <label
-                for="docentes_csv"
-                class="botao"
-                ondragover="arquivo_emcima(event)"
-                ondragleave="arquivo_nao_emcima(this)"
-                ondrop="arquivo_caiu(event)"
-                >Selecionar arquivo</label
-              >
-              <input
-                type="file"
-                id="docentes_csv"
-                name="docentes_csv"
-                class="botao-selecao-arquivo"
-                accept=".csv"
-              />
-              <div>Arquivo enviado</div>
-            </div>
-
-            <p class="label-file">Disciplinas no próximo semestre:</p>
-            <div class="label-input-file">
-              <label
-                for="disciplinas_prox"
-                class="botao"
-                ondragover="arquivo_emcima(event)"
-                ondragleave="arquivo_nao_emcima(this)"
-                ondrop="arquivo_caiu(event)"
-                >Selecionar arquivo</label
-              >
-              <input
-                type="file"
-                id="disciplinas_prox"
-                name="disciplinas_prox"
-                class="botao-selecao-arquivo"
-                accept=".csv"
-              />
-              <div>Arquivo enviado</div>
-            </div>
-
-            <p class="label-file">Quantidades do final do ultimo semestre:</p>
-            <div class="label-input-file">
-              <label
-                for="qtd_fim_ultimo_semestre"
-                class="botao"
-                ondragover="arquivo_emcima(event)"
-                ondragleave="arquivo_nao_emcima(this)"
-                ondrop="arquivo_caiu(event)"
-                >Selecionar arquivo</label
-              >
-              <input
-                type="file"
-                id="qtd_fim_ultimo_semestre"
-                name="qtd_fim_ultimo_semestre"
-                class="botao-selecao-arquivo"
-                accept=".csv"
-              />
-              <div>Arquivo enviado</div>
-            </div>
-
-            <p class="label-file">Preferencias:</p>
-            <div class="label-input-file">
-              <label
-                for="preferencias"
-                class="botao"
-                ondragover="arquivo_emcima(event)"
-                ondragleave="arquivo_nao_emcima(this)"
-                ondrop="arquivo_caiu(event)"
-                >Selecionar arquivo</label
-              >
-              <input
-                type="file"
-                id="preferencias"
-                name="preferencias"
-                class="botao-selecao-arquivo"
-                accept=".csv"
-              />
-              <div>Arquivo enviado</div>
-            </div>
-
-            <p class="label-file">Ultimo semestre:</p>
-            <div class="label-input-file">
-              <label
-                for="ultimo_semestre"
-                class="botao"
-                ondragover="arquivo_emcima(event)"
-                ondragleave="arquivo_nao_emcima(this)"
-                ondrop="arquivo_caiu(event)"
-                >Selecionar arquivo</label
-              >
-              <input
-                type="file"
-                id="ultimo_semestre"
-                name="ultimo_semestre"
-                class="botao-selecao-arquivo"
-                accept=".csv"
-              />
-              <div>Arquivo enviado</div>
-            </div>
-
-            <p class="label-file">Penultimo semestre:</p>
-            <div class="label-input-file">
-              <label
-                for="penultimo_semestre"
-                class="botao"
-                ondragover="arquivo_emcima(event)"
-                ondragleave="arquivo_nao_emcima(this)"
-                ondrop="arquivo_caiu(event)"
-                >Selecionar arquivo</label
-              >
-              <input
-                type="file"
-                id="penultimo_semestre"
-                name="penultimo_semestre"
-                class="botao-selecao-arquivo"
-                accept=".csv"
-              />
-              <div>Arquivo enviado</div>
-            </div>
-
-            <p class="label-file">Antipenultimo semestre:</p>
-            <div class="label-input-file">
-              <label
-                for="antipenultimo_semestre"
-                class="botao"
-                ondragover="arquivo_emcima(event)"
-                ondragleave="arquivo_nao_emcima(this)"
-                ondrop="arquivo_caiu(event)"
-                >Selecionar arquivo</label
-              >
-              <input
-                type="file"
-                id="antipenultimo_semestre"
-                name="antipenultimo_semestre"
-                class="botao-selecao-arquivo"
-                accept=".csv"
-              />
-              <div>Arquivo enviado</div>
-            </div>
-
-            <div class="botoes-de-solucao">
-              <button onclick="solver(event)" class="botao">Resolver</button>
-            </div>
-            <button onclick="erros_de_leitura(event)" class="botao">
-              Erros de leitura
-            </button>
-
-            <label class="download-label" for="export"
-              >Download csv da distribuição desse semestre:</label
-            ><br />
-            <a
-              class="botao"
-              href="{{url_for('download_file', tipo_arquivo = 'csv')}}"
-              >Download</a
-            >
-          </div>
-        </form>
-
-        <div id="presenca-de-arquivo">
-          <div class="json">
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de disciplina ausente
-            </div>
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de docentes ausente
-            </div>
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de solução ausente
-            </div>
-          </div>
-          <div class="csv">
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de professores ausente
-            </div>
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de disciplinas no próximo
-              semestre ausente
-            </div>
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de quantidades do final do
-              ultimo semestre ausente
-            </div>
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de preferencias ausente
-            </div>
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de ultimo semestre ausente
-            </div>
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de penultimo semestre ausente
-            </div>
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de antipenultimo semestre
-              ausente
-            </div>
-            <div class="ausente">
-              <img src="static/X.svg" />Arquivo de solução da otimização ausente
-            </div>
-          </div>
-        </div>
+    <div class="config-tab">
+      <div>
+        <label for="nome_docentes">Escolha um professor:</label>
+        <select name="nome_docentes" id="nome_docentes"></select>
       </div>
 
-      <div id="dados_solucao">
-        <h3>Dados da otimização encontrada:</h3>
-      </div>
-
-      <div class="config-tab">
-        <div>
-          <label for="nome_docentes">Escolha um professor:</label>
-          <select name="nome_docentes" id="nome_docentes"></select>
-        </div>
-
-        <div>
-          <label>
-            Insira codigo de uma composição de <br />
-            turma para adicionar a esse docente
-          </label>
-          <input
-            id="insere_cod_disciplinas"
-            type="text"
-            name="cod_disciplinas"
-            list="cod_disciplinas"
-          />
-          <datalist id="cod_disciplinas" style="display: flex"> </datalist>
-          <button onclick="inserir_par_obrigatorio()">Inserir</button>
-          <button onclick="validar_solucao()">Validar Solução</button>
-        </div>
-        <label for="nome_docentes"
-          >Mostrar infrações de horário
-          <input
-            onclick="alternar_mudanca_conflito()"
-            type="checkbox"
-            id="mostra_conflito"
-            checked
-          />
+      <div>
+        <label>
+          Insira codigo de uma composição de <br />
+          turma para adicionar a esse docente
         </label>
+        <input id="insere_cod_disciplinas" type="text" name="cod_disciplinas" list="cod_disciplinas" />
+        <datalist id="cod_disciplinas" style="display: flex"> </datalist>
+        <button onclick="inserir_par_obrigatorio()">Inserir</button>
+        <button onclick="validar_solucao()">Validar Solução</button>
       </div>
-
-      <div class="mudanca"></div>
-      <div>
-        <table id="horario"></table>
-      </div>
-
-      <div>
-        <h3>Preferencias atendidas e não atendidas:</h3>
-        <div id="tabela_preferencias"></div>
-      </div>
-
-      <div>
-        <h3>Lista de disciplinas que estão liberadas:</h3>
-        <ul id="disciplinas_estao_liberadas"></ul>
-      </div>
-
-      <div>
-        <h3>Lista de disciplinas que serão liberadas:</h3>
-        <ul id="disciplinas_serao_liberadas"></ul>
-      </div>
+      <label for="nome_docentes">Mostrar infrações de horário
+        <input onclick="alternar_mudanca_conflito()" type="checkbox" id="mostra_conflito" checked />
+      </label>
     </div>
 
-    <div class="loader-container" id="loader-container">
-      <p class="loader-label">Carregando...</p>
-      <div class="loader-ellipsis">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-      </div>
+    <div class="mudanca"></div>
+    <div>
+      <table id="horario"></table>
     </div>
 
-    <script type="text/javascript" src="static/script.js"></script>
-  </body>
+    <div>
+      <h3>Preferencias atendidas e não atendidas:</h3>
+      <div id="tabela_preferencias"></div>
+    </div>
+
+    <div>
+      <h3>Lista de disciplinas que estão liberadas:</h3>
+      <ul id="disciplinas_estao_liberadas"></ul>
+    </div>
+
+    <div>
+      <h3>Lista de disciplinas que serão liberadas:</h3>
+      <ul id="disciplinas_serao_liberadas"></ul>
+    </div>
+  </div>
+
+  <div class="loader-container" id="loader-container">
+    <p class="loader-label">Carregando...</p>
+    <div class="loader-ellipsis">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="static/script.js"></script>
+</body>
+
 </html>

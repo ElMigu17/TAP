@@ -6,9 +6,20 @@ html {
 }
 
 .pos-toggle {
+  width: 1120px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.center-header{
   width: 100%;
   display: flex;
   justify-content: center;
+  margin: 8px 0px;
+  .botao {
+    width: 200px;
+  }
+
 }
 
 .deixa-cinza {
@@ -55,6 +66,7 @@ html {
   width: 1120px;
   display: flex;
   flex-direction: row;
+  align-items: center;
   p {
     padding: 0;
     margin: 0;
